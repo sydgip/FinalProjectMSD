@@ -48,4 +48,14 @@
         android:divider="@null"
         android:dividerHeight="0dp"/>
 
+    <!-- Purchased Items List -->
+    <ListView
+        android:id="@+id/purchasedListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/groceryListView"
+        android:layout_marginTop="16dp"
+        android:divider="@null"
+        android:dividerHeight="0dp"/>
+
 </RelativeLayout>

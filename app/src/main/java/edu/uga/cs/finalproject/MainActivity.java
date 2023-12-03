@@ -14,8 +14,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -23,8 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText itemNameEditText;
     private ListView groceryListView;
-    private ArrayAdapter<String> adapter;
-    private ArrayList<String> groceryList;
+    private GroceryItemAdapter adapter;  // Changed this line
+    private ArrayList<GroceryItem> groceryList;
     private DatabaseReference databaseReference;
 
     @Override
@@ -39,9 +42,8 @@ public class MainActivity extends AppCompatActivity {
         Button addButton = findViewById(R.id.addButton);
         groceryListView = findViewById(R.id.groceryListView);
 
-        // Initialize the list and adapter
         groceryList = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, groceryList);
+        adapter = new GroceryItemAdapter(this, groceryList);  // Make sure this matches your custom adapter
         groceryListView.setAdapter(adapter);
 
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -50,36 +52,44 @@ public class MainActivity extends AppCompatActivity {
                 addItemToFirebaseAndListView();
             }
         });
-    }
 
+        fetchItemsFromFirebase();
+    }
+    private void fetchItemsFromFirebase() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                groceryList.clear();  // Clear the existing list
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    GroceryItem item = snapshot.getValue(GroceryItem.class);
+                    if (item != null) {
+                        groceryList.add(item);  // Add item to the list
+                    }
+                }
+                adapter.notifyDataSetChanged();  // Notify the adapter of the data change
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(MainActivity.this, "Failed to fetch items", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
     private void addItemToFirebaseAndListView() {
         String itemName = itemNameEditText.getText().toString().trim();
 
         if (!itemName.isEmpty()) {
-            // Add item to Firebase
+            // Create a new GroceryItem object
             String key = databaseReference.push().getKey();
-            databaseReference.child(key).setValue(itemName)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(MainActivity.this, "Item added to Firebase", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(MainActivity.this, "Failed to add item to Firebase", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+            GroceryItem newItem = new GroceryItem(itemName, key);
 
-            // Add item to ListView
-            groceryList.add(itemName);
-            adapter.notifyDataSetChanged();
-
-            // Clear EditText
-            itemNameEditText.setText("");
+            // Add the whole object to Firebase
+            databaseReference.child(key).setValue(newItem)
+                    .addOnSuccessListener(aVoid -> Toast.makeText(MainActivity.this, "Item added to Firebase", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Failed to add item to Firebase", Toast.LENGTH_SHORT).show());
         } else {
             Toast.makeText(this, "Please enter an item name", Toast.LENGTH_SHORT).show();
         }
     }
 }
+

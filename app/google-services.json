@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "465021964175",
+    "firebase_url": "https://grocerylist-8d40f-default-rtdb.firebaseio.com",
+    "project_id": "grocerylist-8d40f",
+    "storage_bucket": "grocerylist-8d40f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:465021964175:android:2df6992f82938c65d745fa",
+        "android_client_info": {
+          "package_name": "edu.uga.cs.finalproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCv5blLZx-NJGDtWOXLXFughcdOmmjfhKs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
